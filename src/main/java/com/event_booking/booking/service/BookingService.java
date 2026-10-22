@@ -30,7 +30,7 @@ public class BookingService {
 
     public Booking book(BookingRequest request) {
 
-        long eventId = request.getEventId();
+        long eventId = request.eventId();
 
         Event event = eventRepository.findById(eventId)
                 .orElseThrow(() -> new BookingException(
@@ -38,7 +38,7 @@ public class BookingService {
                         "Événement introuvable"
                 ));
 
-        int nbPlaces = request.getNbPlaces();
+        int nbPlaces = request.nbPlaces();
 
         if (nbPlaces < 1 || nbPlaces > 6) {
             throw new BookingException(
