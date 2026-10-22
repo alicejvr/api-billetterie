@@ -1,5 +1,6 @@
 package com.event_booking.booking.service;
 
+import com.event_booking.booking.entities.Event;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
@@ -7,14 +8,9 @@ import org.springframework.stereotype.Component;
 @Primary
 public class StandardPricing implements Pricing {
 
-    private float price = 50;
-
     @Override
-    public float calculatePrice() {
-        return price;
+    public float calculatePrice(Event event) {
+        return event.getPrice();
     }
 
-    public float getPrice() {
-        return price;
-    }
 }

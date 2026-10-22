@@ -2,61 +2,74 @@ package com.event_booking.booking.service;
 
 import com.event_booking.booking.entities.Booking;
 import com.event_booking.booking.entities.Event;
+import com.event_booking.booking.repositories.BookingRepository;
+import com.event_booking.booking.repositories.EventRepository;
 import org.springframework.stereotype.Service;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class BookingService {
 
     private final PricingService pricingService;
-    private final List<Booking> bookings = new ArrayList<>();
+    private final BookingRepository bookingRepository;
+    private final EventRepository eventRepository;
 
-    public BookingService(PricingService pricingService) {
+    public BookingService(PricingService pricingService,BookingRepository bookingRepository, EventRepository eventRepository) {
         this.pricingService = pricingService;
+        this.bookingRepository = bookingRepository;
+        this.eventRepository = eventRepository;
     }
 
+    // méthode qui permet d'effectuer la résa
     public Booking book(Booking booking) {
-        Event event = booking.getEvent();
+        if (booking.getEvent() == null) {
+            throw new IllegalArgumentException(
+                    "L'événement est obligatoire"
+            );
+        }
+
+        // on récup l'Id de l'événement ds la variable eventId
+        long eventId = booking.getEvent().getId();
+
+        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Événement introuvable"));
+
         int nbPlaces = booking.getNbPlaces();
+        // compteur des réservations à zéro
         int placesReservees = 0;
 
+        List<Booking> bookings = bookingRepository.findAll();
+
         for (Booking currentBooking : bookings) {
-            if (currentBooking.getEvent().getId() == event.getId()) {
+            if (currentBooking.getEvent().getId() == eventId) {
                 placesReservees += currentBooking.getNbPlaces();
             }
         }
 
-        if (nbPlaces < 1 || nbPlaces >= 6) {
-            throw new IllegalArgumentException(
-                    "Maximum 6 places"
-            );
+        if (nbPlaces < 1 || nbPlaces > 6) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Maximum 6 places");
         }
 
         int placesDisponibles = event.getCapacity() - placesReservees;
 
         if (nbPlaces > placesDisponibles) {
-            throw new IllegalArgumentException(
-                    "Plus assez de place pr cet event"
-            );
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Plus assez de places dispo pr cet événement");
         }
 
-        float price = pricingService.selectPrice(event);
+        float price = pricingService.selectPrice(event) * nbPlaces;
 
-        Booking newBooking = new Booking(
-                booking.getId(),
-                event,
-                nbPlaces,
-                price
-        );
+        Booking newBooking = new Booking(event, nbPlaces, price);
 
-        bookings.add(newBooking);
-
-        return newBooking;
+        return bookingRepository.save(newBooking);
     }
 
-    public void deleteBooking(String bookingId) {
-        bookings.removeIf(booking -> booking.getId().equals(bookingId));
+    public void cancelBooking(long bookingId) {
+        bookingRepository.deleteById(bookingId);
+    }
+
+    public List<Booking> getAllBookings() {
+        return bookingRepository.findAll();
     }
 }

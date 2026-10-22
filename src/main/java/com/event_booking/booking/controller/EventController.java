@@ -20,8 +20,13 @@ public class EventController {
         return eventService.createEvent(event);
     }
 
-    @GetMapping("/events")
+    @GetMapping("/comingevents")
     public List<Event> getComingEvents() {
+        return eventService.getComingEvents();
+    }
+
+    @GetMapping("/allevents")
+    public List<Event> getAllEvents() {
         return eventService.getAllEvents();
     }
 

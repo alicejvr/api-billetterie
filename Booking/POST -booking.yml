@@ -1,0 +1,25 @@
+info:
+  name: POST /booking
+  type: http
+  seq: 6
+
+http:
+  method: POST
+  url: http://localhost:8082/booking
+  body:
+    type: json
+    data: |-
+      {
+        "event": {
+          "id": 4
+        },
+        "nbPlaces": 1
+      }
+  auth: inherit
+
+settings:
+  encodeUrl: true
+  timeout: 0
+  followRedirects: true
+  maxRedirects: 5
+  forwardAuthorizationHeader: false

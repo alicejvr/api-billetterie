@@ -11,19 +11,25 @@ public class PricingService {
 
     public EarlyBirdPricing earlyBirdPricing;
     public StandardPricing standardPricing;
-    public LocalDate date = LocalDate.now();
 
     @Value("${seuil-jours}")
     private int seuilJours;
+
+    public PricingService(
+            EarlyBirdPricing earlyBirdPricing,
+            StandardPricing standardPricing) {
+        this.earlyBirdPricing = earlyBirdPricing;
+        this.standardPricing = standardPricing;
+    }
 
     public float selectPrice(Event event) {
         LocalDate date = LocalDate.now();
 
         // si la résa est faite + de 30 jours avant le début de l'événement
         if (event.getStartDate().isAfter(date.plusDays(seuilJours))) {
-            return earlyBirdPricing.calculatePrice(); // tarif EarlyBird
+            return earlyBirdPricing.calculatePrice(event); // tarif EarlyBird
         }
-        return standardPricing.getPrice(); // sinon : tarif sandard
+        return standardPricing.calculatePrice(event); // sinon : tarif sandard
     }
 
 }

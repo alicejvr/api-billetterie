@@ -4,6 +4,8 @@ import com.event_booking.booking.entities.Booking;
 import com.event_booking.booking.service.BookingService;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 public class BookingController {
     private BookingService bookingService;
@@ -17,9 +19,14 @@ public class BookingController {
         return bookingService.book(booking);
     }
 
+    @GetMapping("/booking")
+    public List<Booking> bookings() {
+        return bookingService.getAllBookings();
+    }
+
     @DeleteMapping("/booking/{bookingId}")
-    public void deleteBooking(@PathVariable String bookingId) {
-        bookingService.deleteBooking(bookingId);
+    public void cancelBooking(@PathVariable long bookingId) {
+        bookingService.cancelBooking(bookingId);
     }
 
 

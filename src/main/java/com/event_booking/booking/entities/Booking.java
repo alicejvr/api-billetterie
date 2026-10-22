@@ -1,30 +1,27 @@
 package com.event_booking.booking.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
+import jakarta.persistence.*;
 
 @Entity
 public class Booking {
     @Id
-    public String id;
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    public long id;
     @ManyToOne
     public Event event;
     public int nbPlaces;
     public float price;
 
-    public Booking(String id, Event event, int nbPlaces, float price) {
-        this.id = id;
+    public Booking(Event event, int nbPlaces, float price) {
         this.event = event;
         this.nbPlaces = nbPlaces;
         this.price = price;
     }
 
     public Booking() {
-
     }
 
-    public String getId() {
+    public long getId() {
         return id;
     }
 

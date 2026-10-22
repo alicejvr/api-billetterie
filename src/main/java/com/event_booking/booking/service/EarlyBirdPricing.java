@@ -1,5 +1,6 @@
 package com.event_booking.booking.service;
 
+import com.event_booking.booking.entities.Event;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -14,8 +15,8 @@ public class EarlyBirdPricing implements  Pricing {
         this.taux = taux;
     }
 
-    public float calculatePrice() {
-        return standardPricing.getPrice() * (1 - taux /100);
+    public float calculatePrice(Event event) {
+        return standardPricing.calculatePrice(event) * (1 - taux /100);
     }
 
 
