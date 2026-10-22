@@ -1,7 +1,10 @@
 package com.event_booking.booking.service;
 
+import com.event_booking.booking.dto.BookingRequest;
 import com.event_booking.booking.entities.Booking;
 import com.event_booking.booking.entities.Event;
+import com.event_booking.booking.exception.BookingException;
+import com.event_booking.booking.pricing.PricingService;
 import com.event_booking.booking.repositories.BookingRepository;
 import com.event_booking.booking.repositories.EventRepository;
 import org.springframework.stereotype.Service;
@@ -24,22 +27,27 @@ public class BookingService {
     }
 
     // méthode qui permet d'effectuer la résa
-    public Booking book(Booking booking) {
-        if (booking.getEvent() == null) {
-            throw new IllegalArgumentException(
-                    "L'événement est obligatoire"
+
+    public Booking book(BookingRequest request) {
+
+        long eventId = request.getEventId();
+
+        Event event = eventRepository.findById(eventId)
+                .orElseThrow(() -> new BookingException(
+                        HttpStatus.NOT_FOUND,
+                        "Événement introuvable"
+                ));
+
+        int nbPlaces = request.getNbPlaces();
+
+        if (nbPlaces < 1 || nbPlaces > 6) {
+            throw new BookingException(
+                    HttpStatus.BAD_REQUEST,
+                    "Maximum 6 places"
             );
         }
 
-        // on récup l'Id de l'événement ds la variable eventId
-        long eventId = booking.getEvent().getId();
-
-        Event event = eventRepository.findById(eventId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Événement introuvable"));
-
-        int nbPlaces = booking.getNbPlaces();
-        // compteur des réservations à zéro
         int placesReservees = 0;
-
         List<Booking> bookings = bookingRepository.findAll();
 
         for (Booking currentBooking : bookings) {
@@ -48,14 +56,13 @@ public class BookingService {
             }
         }
 
-        if (nbPlaces < 1 || nbPlaces > 6) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Maximum 6 places");
-        }
-
         int placesDisponibles = event.getCapacity() - placesReservees;
 
         if (nbPlaces > placesDisponibles) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Plus assez de places dispo pr cet événement");
+            throw new BookingException(
+                    HttpStatus.CONFLICT,
+                    "Plus assez de places disponibles pour cet événement"
+            );
         }
 
         float price = pricingService.selectPrice(event) * nbPlaces;
@@ -64,6 +71,7 @@ public class BookingService {
 
         return bookingRepository.save(newBooking);
     }
+
 
     public void cancelBooking(long bookingId) {
         bookingRepository.deleteById(bookingId);

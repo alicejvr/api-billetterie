@@ -1,4 +1,4 @@
-package com.event_booking.booking.service;
+package com.event_booking.booking.pricing;
 
 import com.event_booking.booking.entities.Event;
 import org.springframework.context.annotation.Primary;

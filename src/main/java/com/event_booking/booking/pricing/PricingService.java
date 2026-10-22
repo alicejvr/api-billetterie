@@ -1,6 +1,7 @@
-package com.event_booking.booking.service;
+package com.event_booking.booking.pricing;
 
 import com.event_booking.booking.entities.Event;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -9,15 +10,15 @@ import java.time.LocalDate;
 @Service
 public class PricingService {
 
-    public EarlyBirdPricing earlyBirdPricing;
-    public StandardPricing standardPricing;
+    private final Pricing earlyBirdPricing;
+    private final Pricing standardPricing;
 
     @Value("${seuil-jours}")
     private int seuilJours;
 
     public PricingService(
-            EarlyBirdPricing earlyBirdPricing,
-            StandardPricing standardPricing) {
+            @Qualifier("earlyBirdPricing") Pricing earlyBirdPricing,
+            @Qualifier("standardPricing") Pricing standardPricing) {
         this.earlyBirdPricing = earlyBirdPricing;
         this.standardPricing = standardPricing;
     }

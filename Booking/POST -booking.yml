@@ -10,10 +10,8 @@ http:
     type: json
     data: |-
       {
-        "event": {
-          "id": 4
-        },
-        "nbPlaces": 1
+        "eventId": 1,
+        "nbPlaces": 2
       }
   auth: inherit
 
